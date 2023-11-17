@@ -1,0 +1,10 @@
+C:\Users\fran_\source\repos\DAM\Peliculas\bin\Debug\Peliculas.exe.config
+C:\Users\fran_\source\repos\DAM\Peliculas\bin\Debug\Peliculas.exe
+C:\Users\fran_\source\repos\DAM\Peliculas\bin\Debug\Peliculas.pdb
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.csproj.AssemblyReference.cache
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.Properties.Resources.resources
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.csproj.GenerateResource.cache
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.csproj.CoreCompileInputs.cache
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.exe
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.pdb
+C:\Users\fran_\source\repos\DAM\Peliculas\obj\Debug\Peliculas.FrmMain.resources
