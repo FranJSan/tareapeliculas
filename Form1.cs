@@ -11,13 +11,14 @@ using System.IO;
 
 /// <summary>
 /// Tarea 04 Desarrollo de Interfaces.
-/// Ha excepción del formulario principal, el resto de los controles han sido creados y configurados mediante código. Estos controles estan
-/// concentrados en el método IniciarComponentes() (está colocado al final del código porque es un buen trozo que solo contiene configuraciones),
-/// salvo los RadioButtons que se crean en otro método adiccional CrearRadioButtons() y se carga en el evento Load del Form principal. 
 /// 
-/// El programa lee el archivo Peliculas.txt y crear tantos RadioButtons como distintas categorias existan. Además de la funcionalidad
+/// Ha excepción del formulario principal, el resto de los controles han sido creados y configurados mediante código. Estos controles estan
+/// concentrados en el método ConfigurarComponentes() (está colocado al final del código porque es un buen cacho que solo contiene configuraciones),
+/// salvo los RadioButtons que se crean en otro método adiccional - CrearRadioButtons() -. Todo se carga en el evento Load del Form principal. 
+/// 
+/// El programa lee el archivo Peliculas.txt y crea tantos RadioButtons como distintas categorias existan. Además de la funcionalidad
 /// de filtrado de los RadioButtons, todos los items de las ListBox pueden filtra por su selección, pudiendo filtrar no solo por categoria, 
-/// sino también por título, actor y director. 
+/// también por título, actor y director. 
 /// 
 /// También he añadido una ListBox de peliculas favoritas. Para añadir una película a la lista hacer click con en botón derecho sobre un título.
 /// Para visualizar la lista de favoritas, pulsar el botón. Para borrar una película de la lista de favoritas, hacer click derecho sobre el título
@@ -26,14 +27,11 @@ using System.IO;
 /// Al final me ha quedado un buen trozo de código, he intentado organizarlo un poco poniendo por arriba los métodos importantes para resolver
 /// la tarea, según vayas bajando irás encontrando las funcionalidades y eventos adiccionales, por si quieres ignorarlo.
 /// 
-/// 
-/// todo: reorganizar código -> nuevas clases¿?, repasar comentarios¿?
 /// </summary>
 namespace Peliculas
 {    
     public partial class FrmMain : Form
     {
-
         private List<Pelicula> lista = new List<Pelicula>();
         private List<string> listaCategorias = new List<string>();
         private ListBox LbTitulos, LbActores, LbDirectores, LbFavoritas;
@@ -42,7 +40,9 @@ namespace Peliculas
         private ContextMenu CMenu;
         private MenuItem AddFavoritas, borrarFavoritas;
         private Panel PanelMain;
-        private GroupBox GroupRB;
+        // Para agrupar los RadioButtons iba a usar un GroupBox, pero tiene un marco que no se puede modificar (al menos facilmente), a si que
+        // directamente los he metido en un Panel
+        private Panel PanelGroupRB;
 
         public FrmMain()
         {
@@ -52,7 +52,7 @@ namespace Peliculas
         private void Form1_Load(object sender, EventArgs e)
         {
             ConfigurarComponentes();
-            // El directorio raíz en runtime es "debug", tener en cuenta para las rutas
+            // El root en runtime es "debug", tener en cuenta para las rutas
             LeerFichero("..//..//Peliculas.txt");
             CrearCategorias();
             CrearRadioButtons(listaCategorias);
@@ -84,6 +84,7 @@ namespace Peliculas
             catch (Exception e)
             {
                 MessageBox.Show("Error al leer el archivo con los datos. Compruebe la ruta del archivo.");
+                Environment.Exit(1);
             } finally
             {
                 sr.Close();
@@ -121,7 +122,7 @@ namespace Peliculas
             rbTodos.Left = 20;
             rbTodos.Visible = true;
             rbTodos.CheckedChanged += new EventHandler(RadioButtonTodosChanged);
-            GroupRB.Controls.Add(rbTodos);
+            PanelGroupRB.Controls.Add(rbTodos);
 
             listaCategorias.Sort();
             for (int i = 0; i < categorias.Count(); i++)
@@ -135,7 +136,7 @@ namespace Peliculas
                 rb.Left = 20;
                 rb.Visible = true;
                 rb.CheckedChanged += new EventHandler(RadioButonChekedChanged);
-                GroupRB.Controls.Add(rb);
+                PanelGroupRB.Controls.Add(rb);
             }
         }
 
@@ -149,7 +150,7 @@ namespace Peliculas
         /// </remarks>
         private void RadioButonChekedChanged(object sender, EventArgs e)
         {
-            // Solo se ejecuta el método si es un cheked
+            // Al limpiar los RB se activaba el evento y se ejecutaba el método, por eso compruebo antes de continuar si es un 'check' 
             if (!((RadioButton)sender).Checked) return;
 
             string categoria = ((RadioButton)sender).Text;
@@ -157,7 +158,6 @@ namespace Peliculas
             LbTitulos.Items.Clear();
             LbActores.Items.Clear();
             LbDirectores.Items.Clear();
-
             foreach (Pelicula p in lista)
             {
                 if (p.Categoria.Equals(categoria))
@@ -190,7 +190,7 @@ namespace Peliculas
         /// </remarks>
         private void RadioButtonTodosChanged(object sender, EventArgs e)
         {
-            // Al limpiar los RB se activava el evento y se ejecutaba el método, por eso compruebo antes de continuar si es un 'check' 
+            // Solo se ejecuta el método si es un cheked
             if (!((RadioButton)sender).Checked) return;
 
             LbTitulos.Items.Clear();
@@ -215,8 +215,6 @@ namespace Peliculas
                 if (!LbDirectores.Items.Contains(p.Director)) LbDirectores.Items.Add(p.Director);
             }
         }
-
-       
 
         /// <summary>
         /// Controlador de la acción 'doble click' sobre cualquier item de las ListBox.
@@ -355,7 +353,7 @@ namespace Peliculas
             LbDirectores.SelectedItem = null;
             LbDirectores.Items.Clear();
 
-            foreach (RadioButton rb in GroupRB.Controls)
+            foreach (RadioButton rb in PanelGroupRB.Controls)
             {
                 rb.Checked = false;
             }
@@ -450,7 +448,7 @@ namespace Peliculas
             this.Text = "Catalogo de películas";
             this.Font = new Font("Comic Sans MS", 8, FontStyle.Regular);
 
-            // Todo está sobre un Panel
+            // Todo está sobre este Panel
             PanelMain = new Panel();
             PanelMain.Width = this.Width;
             PanelMain.Height = this.Height;
@@ -458,12 +456,11 @@ namespace Peliculas
             PanelMain.BackColor = Color.AntiqueWhite;
             this.Controls.Add(PanelMain);
 
-            // A este Group se le añadiran los RadioButton. Le inicializo aquí para poder usarlo de referencia en la posición de las Listbox
-            GroupRB = new GroupBox();
-            GroupRB.Width = this.Width / 2;
-            GroupRB.Height = this.Height - 120;
-            GroupRB.Visible = true;
-            PanelMain.Controls.Add(GroupRB);
+            // A este PanelGroup se le añadiran los RadioButton. Le inicializo aquí para poder usarlo de referencia en la posición de las Listbox
+            PanelGroupRB = new Panel();
+            PanelGroupRB.Width = this.Width / 2;
+            PanelGroupRB.Height = this.Height - 120;
+            PanelMain.Controls.Add(PanelGroupRB);
 
             // =========== ListBox y sus Labels ===========
 
@@ -471,14 +468,14 @@ namespace Peliculas
             Label LabelTitulos = new Label();
             LabelTitulos.Text = "Títulos";
             LabelTitulos.Top = 10;
-            LabelTitulos.Left = 10 + GroupRB.Width;
+            LabelTitulos.Left = 10 + PanelGroupRB.Width;
             // LbTitulos
             LbTitulos = new ListBox();
             LbTitulos.Tag = "titulos";
             LbTitulos.Visible = true;
             LbTitulos.Sorted = true;
             LbTitulos.Top = 30;
-            LbTitulos.Left = 10 + GroupRB.Width;
+            LbTitulos.Left = 10 + PanelGroupRB.Width;
             LbTitulos.Width = 310;
             LbTitulos.DoubleClick += new EventHandler(DoubleClick_ListBox);
             LbTitulos.MouseUp += new MouseEventHandler(ItemMouseUp_Click);
@@ -490,13 +487,13 @@ namespace Peliculas
             Label LabelActores = new Label();
             LabelActores.Text = "Actores";
             LabelActores.Top = LbTitulos.Location.Y + LbTitulos.Height + 30;
-            LabelActores.Left = 10 + GroupRB.Width;
+            LabelActores.Left = 10 + PanelGroupRB.Width;
             // LbActores
             LbActores = new ListBox();
             LbActores.Tag = "actores";
             LbActores.Sorted = true;
             LbActores.Top = LbTitulos.Location.Y + LbTitulos.Height + 50;
-            LbActores.Left = 10 + GroupRB.Width;
+            LbActores.Left = 10 + PanelGroupRB.Width;
             LbActores.Width = 150;
             LbActores.DoubleClick += new EventHandler(DoubleClick_ListBox);
 
@@ -555,10 +552,10 @@ namespace Peliculas
             PanelMain.Controls.Add(BtnFavoritas);
 
             // FrmFav
-            FrmFav = new FrmFav();
-            FrmFav.Controls.Add(LbFavoritas);
+            FrmFav = new FrmFav();             
+            FrmFav.Controls.Add(LbFavoritas);                 
             FrmFav.Controls.Add(LabelFavoritas);
-
+            
             // ContextMenu y MenuItem
             CMenu = new ContextMenu();
             AddFavoritas = new MenuItem("Añadir a favoritas");
@@ -568,11 +565,11 @@ namespace Peliculas
 
             // LabelInfo
             Label lblInfo = new Label();
-            lblInfo.Width = GroupRB.Width;
+            lblInfo.Width = PanelGroupRB.Width;
             lblInfo.Height = 100;
             lblInfo.Text = "Doble click para filtrar por título, actor o director.\n\nClick derecho sobre un título para añadir a favoritas.";
-            lblInfo.Top = GroupRB.Height + 10;
-            lblInfo.Left = 10;
+            lblInfo.Top = PanelGroupRB.Height + 10;
+            lblInfo.Left = 20;
             PanelMain.Controls.Add(lblInfo);
         }
     }

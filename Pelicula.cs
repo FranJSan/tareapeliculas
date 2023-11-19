@@ -62,7 +62,7 @@ namespace Peliculas
         /// </summary>
         private void NormalizarAtributos()
         {
-            string[] charsRemplazar = { ".", "..", "...", "-" };
+            string[] charsRemplazar = { ".", "..", "...", "-"};
             foreach (string c in charsRemplazar)
             {
                 Titulo = Titulo.Replace(c, " ").Trim();
